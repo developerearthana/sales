@@ -61,3 +61,4 @@ npm run dev
 - `src/api/` — serverless routes for orchestration and agents
 - `src/lib/` — shared utilities for config, Supabase, and agent management
 - `supabase/schema.sql` — initial table schema for lead state and embeddings
+
