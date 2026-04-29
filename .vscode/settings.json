@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "supabase/**/*.sql": "pgsql",
+    "supabase/*.sql": "pgsql"
+  },
+  "sql.linter.enabled": false,
+  "editor.tabSize": 2,
+  "[typescript]": { "editor.formatOnSave": true },
+  "[typescriptreact]": { "editor.formatOnSave": true }
+}
