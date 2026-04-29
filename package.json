@@ -1,0 +1,20 @@
+{
+  "name": "sales-automation-multi-agent",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev --listen 3000",
+    "build": "tsc --noEmit",
+    "start": "vercel dev --listen 3000"
+  },
+  "dependencies": {
+    "@hubspot/api-client": "^13.5.0",
+    "@sendgrid/mail": "^8.1.6",
+    "@supabase/supabase-js": "^2.0.0",
+    "twilio": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vercel": "^52.0.0"
+  }
+}
