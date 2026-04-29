@@ -12,6 +12,7 @@
     "@hubspot/api-client": "^13.5.0",
     "@sendgrid/mail": "^8.1.6",
     "@supabase/supabase-js": "^2.0.0",
+    "@vercel/speed-insights": "^2.0.0",
     "lucide-react": "^0.466.0",
     "next": "^15.3.1",
     "react": "^18.3.1",
