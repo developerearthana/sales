@@ -6,5 +6,9 @@
   "sql.linter.enabled": false,
   "editor.tabSize": 2,
   "[typescript]": { "editor.formatOnSave": true },
-  "[typescriptreact]": { "editor.formatOnSave": true }
+  "[typescriptreact]": {
+    "editor.formatOnSave": true
+  },
+  "github.copilot.chat.cli.remote.enabled": true,
+  "github.copilot.chat.skillTool.enabled": true
 }

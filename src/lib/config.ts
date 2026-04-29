@@ -13,7 +13,8 @@ export const config = {
   instantlyApiKey: process.env.INSTANTLY_API_KEY ?? "",
   retellApiKey: process.env.RETELL_API_KEY ?? "",
   watiApiKey: process.env.WATI_API_KEY ?? "",
-  smartleadApiKey: process.env.SMARTLEAD_API_KEY ?? ""
+  smartleadApiKey: process.env.SMARTLEAD_API_KEY ?? "",
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? ""
 };
 
 export function requireEnv(varName: keyof typeof config): string {

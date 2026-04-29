@@ -1,9 +1,10 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ]
+    { "src": "package.json", "use": "@vercel/next" }
+  ],
+  "github": {
+    "autoJobCancelation": true,
+    "silent": false
+  }
 }

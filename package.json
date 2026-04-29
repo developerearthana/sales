@@ -9,6 +9,7 @@
     "start": "next start -p 3000"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
     "@hubspot/api-client": "^13.5.0",
     "@sendgrid/mail": "^8.1.6",
     "@supabase/supabase-js": "^2.0.0",

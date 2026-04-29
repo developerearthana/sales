@@ -87,3 +87,59 @@ drop trigger if exists trg_leads_updated_at on leads;
 create trigger trg_leads_updated_at
   before update on leads
   for each row execute procedure set_updated_at();
+
+-- ============================================================
+-- deals  (Gridwise™ sales pipeline)
+-- ============================================================
+create table if not exists deals (
+  id                   text primary key,
+  lead_id              text references leads (id) on delete cascade,
+  stage                text not null default 'discovered',
+  value                numeric(12,2) default 0,
+  currency             text default 'INR',
+  probability          integer default 10,
+  owner                text,
+  notes                text,
+  expected_close_date  date,
+  won_at               timestamptz,
+  lost_at              timestamptz,
+  lost_reason          text,
+  created_at           timestamptz default now(),
+  updated_at           timestamptz default now()
+);
+
+create index if not exists idx_deals_lead_id    on deals (lead_id);
+create index if not exists idx_deals_stage      on deals (stage);
+create index if not exists idx_deals_updated_at on deals (updated_at desc);
+
+drop trigger if exists trg_deals_updated_at on deals;
+create trigger trg_deals_updated_at
+  before update on deals
+  for each row execute procedure set_updated_at();
+
+-- ============================================================
+-- follow_ups  (scheduled multi-channel follow-up sequences)
+-- ============================================================
+create table if not exists follow_ups (
+  id           text primary key,
+  lead_id      text references leads (id) on delete cascade,
+  deal_id      text references deals (id) on delete set null,
+  channel      text not null,              -- email | whatsapp | call
+  status       text default 'scheduled',   -- scheduled | sent | skipped | failed
+  subject      text,
+  message      text,
+  scheduled_at timestamptz not null,
+  sent_at      timestamptz,
+  created_at   timestamptz default now(),
+  updated_at   timestamptz default now()
+);
+
+create index if not exists idx_follow_ups_lead_id      on follow_ups (lead_id);
+create index if not exists idx_follow_ups_status       on follow_ups (status);
+create index if not exists idx_follow_ups_scheduled_at on follow_ups (scheduled_at asc)
+  where status = 'scheduled';
+
+drop trigger if exists trg_follow_ups_updated_at on follow_ups;
+create trigger trg_follow_ups_updated_at
+  before update on follow_ups
+  for each row execute procedure set_updated_at();

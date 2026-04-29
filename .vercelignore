@@ -1,0 +1,9 @@
+.git
+.next
+node_modules
+*.test.ts
+*.spec.ts
+test-build.ps1
+scripts/
+tsconfig.tsbuildinfo
+.claude/
