@@ -1,16 +1,18 @@
 import { saveLeadState } from "../../lib/agentManager";
 import { fetchCrmLeadByEmail, upsertCrmLead } from "../../lib/crmClient";
 
-export default async function handler(req: Request) {
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
-  }
+export type LeadPayload = {
+  id: string;
+  email: string;
+  name: string;
+  company: string;
+  title?: string;
+};
 
-  const body = await req.json();
-  const lead = body as { id: string; email: string; name: string; company: string; title?: string };
-
+export async function researchAgent(body: unknown) {
+  const lead = body as LeadPayload;
   if (!lead?.id || !lead.email) {
-    return new Response(JSON.stringify({ error: "Missing lead id or email" }), { status: 400 });
+    throw new Error("Missing lead id or email");
   }
 
   const existingCrmLead = await fetchCrmLeadByEmail(lead.email);
@@ -30,9 +32,7 @@ export default async function handler(req: Request) {
       updated_at: new Date().toISOString()
     });
 
-    return new Response(JSON.stringify({ status: "lead_exists", leadId: lead.id }), {
-      headers: { "Content-Type": "application/json" }
-    });
+    return { status: "lead_exists", leadId: lead.id };
   }
 
   await upsertCrmLead({
@@ -53,7 +53,23 @@ export default async function handler(req: Request) {
     updated_at: new Date().toISOString()
   });
 
-  return new Response(JSON.stringify({ status: "research_completed", leadId: lead.id }), {
-    headers: { "Content-Type": "application/json" }
-  });
+  return { status: "research_completed", leadId: lead.id };
+}
+
+export default async function handler(req: any, res: any) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  let body = req.body;
+  if (typeof body === "string") {
+    body = JSON.parse(body);
+  }
+
+  try {
+    const result = await researchAgent(body);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    return res.status(400).json({ error: error?.message ?? "Invalid request" });
+  }
 }

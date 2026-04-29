@@ -1,32 +1,28 @@
 import { getLeadState, saveLeadState } from "../../lib/agentManager";
 import { sendWhatsAppMessage } from "../../lib/whatsappClient";
 
-export default async function handler(req: Request) {
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
-  }
-
-  const body = await req.json();
-  const { leadId, channel, event, message } = body as {
+export async function engagementAgent(body: unknown) {
+  const payload = body as {
     leadId: string;
     channel: string;
     event: string;
     message?: string;
   };
+  const { leadId, channel, event, message } = payload;
 
   if (!leadId || !channel || !event) {
-    return new Response(JSON.stringify({ error: "Missing leadId, channel, or event" }), { status: 400 });
+    throw new Error("Missing leadId, channel, or event");
   }
 
   const lead = await getLeadState(leadId);
   if (!lead) {
-    return new Response(JSON.stringify({ error: "Lead not found" }), { status: 404 });
+    throw new Error("Lead not found");
   }
 
   const outgoingMessage = message ?? `Hi ${lead.name ?? "there"}, I wanted to follow up on a quick idea for ${lead.company}.`;
   const destination = (lead.metadata as any)?.phone ?? "";
   if (!destination) {
-    return new Response(JSON.stringify({ error: "No WhatsApp destination available for lead" }), { status: 400 });
+    throw new Error("No WhatsApp destination available for lead");
   }
 
   await sendWhatsAppMessage(destination, outgoingMessage);
@@ -40,7 +36,24 @@ export default async function handler(req: Request) {
 
   await saveLeadState(update);
 
-  return new Response(JSON.stringify({ status: "engagement_recorded", leadId, channel, event }), {
-    headers: { "Content-Type": "application/json" }
-  });
+  return { status: "engagement_recorded", leadId, channel, event };
+}
+
+export default async function handler(req: any, res: any) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  let body = req.body;
+  if (typeof body === "string") {
+    body = JSON.parse(body);
+  }
+
+  try {
+    const result = await engagementAgent(body);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    const message = error?.message ?? "Invalid request";
+    return res.status(message === "Lead not found" ? 404 : 400).json({ error: message });
+  }
 }

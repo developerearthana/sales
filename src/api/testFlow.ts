@@ -1,8 +1,8 @@
-import orchestrator from "./orchestrator";
+import { runOrchestrator } from "./orchestrator";
 
-export default async function handler(req: Request) {
+export default async function handler(req: any, res: any) {
   if (req.method === "GET") {
-    return new Response(JSON.stringify({
+    return res.status(200).json({
       message: "Send a POST request to this endpoint to start a sample lead flow.",
       sampleBody: {
         agent: "researcher",
@@ -14,18 +14,22 @@ export default async function handler(req: Request) {
           title: "Founder"
         }
       }
-    }), { headers: { "Content-Type": "application/json" } });
+    });
   }
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const request = new Request("https://orchestrator.local/api/orchestrator", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: req.body
-  });
+  let body = req.body;
+  if (typeof body === "string") {
+    body = JSON.parse(body);
+  }
 
-  return orchestrator(request as Request);
+  try {
+    const result = await runOrchestrator(body);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    return res.status(400).json({ error: error?.message ?? "Invalid request" });
+  }
 }
