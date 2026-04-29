@@ -1,17 +1,30 @@
 import { callAgent } from "../lib/agentRouter";
 import { saveLeadState } from "../lib/agentManager";
 
-export async function runOrchestrator(body: unknown) {
-  const { agent, lead } = body as { agent: string; lead: Record<string, unknown> };
+export type OrchestratorPayload = {
+  agent: string;
+  lead?: Record<string, unknown>;
+  payload?: unknown;
+};
 
-  if (!agent || !lead?.id) {
-    throw new Error("Missing agent or lead.id");
+export async function runOrchestrator(body: OrchestratorPayload) {
+  const { agent, lead, payload } = body;
+
+  if (!agent) {
+    throw new Error("Missing agent");
   }
 
-  await saveLeadState({ ...lead, updated_at: new Date().toISOString() });
-  const result = await callAgent(agent, lead);
+  const input = payload ?? lead ?? body;
+  if (!input) {
+    throw new Error("Missing payload for agent routing");
+  }
 
-  return { status: "routed", result };
+  if (lead?.id) {
+    await saveLeadState({ ...lead, updated_at: new Date().toISOString() });
+  }
+
+  const result = await callAgent(agent, input);
+  return { status: "routed", resource: agent, result };
 }
 
 export default async function handler(req: any, res: any) {

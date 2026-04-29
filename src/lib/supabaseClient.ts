@@ -1,14 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
-import { config, requireEnv } from "./config";
+import { config } from "./config";
 
-const supabaseUrl = requireEnv("supabaseUrl");
-const supabaseKey = requireEnv("supabaseKey");
+if (!config.supabaseUrl || !config.supabaseKey) {
+  console.warn("[supabase] SUPABASE_URL or SUPABASE_KEY not set — database calls will fail.");
+}
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: false
-  }
-});
+export const supabase = createClient(
+  config.supabaseUrl || "https://placeholder.supabase.co",
+  config.supabaseKey || "placeholder",
+  { auth: { persistSession: false } }
+);
 
 export type LeadRecord = {
   id: string;

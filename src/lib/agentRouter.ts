@@ -2,12 +2,16 @@ import { researchAgent } from "../api/agents/research";
 import { outboundAgent } from "../api/agents/outbound";
 import { engagementAgent } from "../api/agents/engagement";
 import { voiceAgent } from "../api/agents/voice";
+import { leadScoutAgent } from "../api/agents/leadScout";
+import { closerAgent } from "../api/agents/closer";
 
 const agentHandlers: Record<string, (payload: unknown) => Promise<unknown>> = {
   researcher: researchAgent,
+  leadScout: leadScoutAgent,
   outbound: outboundAgent,
   engagement: engagementAgent,
-  voice: voiceAgent
+  voice: voiceAgent,
+  closer: closerAgent
 };
 
 export async function callAgent(agentName: string, payload: unknown) {

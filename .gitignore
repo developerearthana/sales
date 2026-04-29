@@ -4,3 +4,8 @@ node_modules/
 .vscode/
 .vercel/
 .vercel
+.next/
+next-env.d.ts
+tsconfig.tsbuildinfo
+test-build.ps1
+scripts/

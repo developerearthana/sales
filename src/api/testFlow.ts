@@ -13,6 +13,19 @@ export default async function handler(req: any, res: any) {
           company: "Example Co",
           title: "Founder"
         }
+      },
+      sampleLeadScout: {
+        agent: "leadScout",
+        payload: {
+          query: "I need tech founders in fintech who recently raised seed or series A funding"
+        }
+      },
+      sampleCloser: {
+        agent: "closer",
+        payload: {
+          leadId: "lead-001",
+          hook: "your recent announcement about customer expansion"
+        }
       }
     });
   }

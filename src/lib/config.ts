@@ -7,7 +7,13 @@ export const config = {
   twilioAccountSid: process.env.TWILIO_ACCOUNT_SID ?? "",
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN ?? "",
   twilioWhatsAppFrom: process.env.TWILIO_WHATSAPP_FROM ?? "",
-  twilioVoiceFrom: process.env.TWILIO_VOICE_FROM ?? ""
+  twilioVoiceFrom: process.env.TWILIO_VOICE_FROM ?? "",
+  apolloApiKey: process.env.APOLLO_API_KEY ?? "",
+  firecrawlApiKey: process.env.FIRECRAWL_API_KEY ?? "",
+  instantlyApiKey: process.env.INSTANTLY_API_KEY ?? "",
+  retellApiKey: process.env.RETELL_API_KEY ?? "",
+  watiApiKey: process.env.WATI_API_KEY ?? "",
+  smartleadApiKey: process.env.SMARTLEAD_API_KEY ?? ""
 };
 
 export function requireEnv(varName: keyof typeof config): string {

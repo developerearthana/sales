@@ -1,7 +1,7 @@
 import { Client } from "@hubspot/api-client";
 import { config } from "./config";
 
-const hubspot = new Client({ apiKey: config.hubspotApiKey });
+const hubspot = new Client({ accessToken: config.hubspotApiKey });
 
 export async function fetchCrmLeadByEmail(email: string) {
   if (!email) return null;

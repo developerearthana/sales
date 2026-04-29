@@ -5,16 +5,24 @@
   "private": true,
   "scripts": {
     "dev": "vercel dev --listen 3000",
-    "build": "tsc --noEmit",
-    "start": "vercel dev --listen 3000"
+    "build": "next build && tsc --noEmit",
+    "start": "next start -p 3000"
   },
   "dependencies": {
     "@hubspot/api-client": "^13.5.0",
     "@sendgrid/mail": "^8.1.6",
     "@supabase/supabase-js": "^2.0.0",
+    "lucide-react": "^0.466.0",
+    "next": "^15.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "twilio": "^6.0.0"
   },
   "devDependencies": {
+    "@types/react": "19.2.14",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.57",
+    "tailwindcss": "^3.4.4",
     "typescript": "^5.6.0",
     "vercel": "^52.0.0"
   }

@@ -20,8 +20,10 @@ export default async function handler(req: Request) {
         <li><a href="/api/health">/api/health</a></li>
         <li><a href="/api/testFlow">/api/testFlow</a></li>
         <li><a href="/api/orchestrator">/api/orchestrator</a> (POST)</li>
+        <li><a href="/api/leads">/api/leads</a> (GET)</li>
+        <li><a href="/api/notifications">/api/notifications</a> (GET)</li>
       </ul>
-      <p>Use the API routes to verify the app is running.</p>
+      <p>This app now supports human-in-the-loop review flags, a lead scout persona, and a closer copywriter flow for high-conversion outreach.</p>
     </body>
     </html>
   `, {
