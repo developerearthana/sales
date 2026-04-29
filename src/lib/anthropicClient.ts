@@ -178,3 +178,172 @@ export async function suggestNextAction(lead: {
 export function isAIConfigured(): boolean {
   return !!config.anthropicApiKey;
 }
+
+// ── Website analysis ───────────────────────────────────────────────────────
+
+export type WebsiteAnalysis = {
+  companyName: string;
+  industry: string;
+  location: string;
+  employeeEstimate: string;
+  businessSummary: string;
+  painPoints: string[];
+  gridwiseFit: number;
+  gridwiseFitReason: string;
+  targetTitles: string[];
+  idealContactProfile: string;
+  outreachAngle: EmailStyle;
+  intentSignals: string[];
+};
+
+const ANALYSIS_FALLBACK: WebsiteAnalysis = {
+  companyName: "Unknown",
+  industry: "Manufacturing",
+  location: "Tamil Nadu",
+  employeeEstimate: "Unknown",
+  businessSummary: "AI analysis unavailable — configure ANTHROPIC_API_KEY.",
+  painPoints: [],
+  gridwiseFit: 50,
+  gridwiseFitReason: "Default score",
+  targetTitles: ["Plant Manager", "MD", "Operations Head"],
+  idealContactProfile: "Plant Manager or MD",
+  outreachAngle: "efficiency",
+  intentSignals: []
+};
+
+export async function analyzeWebsite(params: {
+  url: string;
+  content: string;
+  pageTitle?: string;
+}): Promise<WebsiteAnalysis> {
+  const client = getClient();
+  if (!client) return { ...ANALYSIS_FALLBACK, companyName: params.pageTitle ?? params.url };
+
+  try {
+    const msg = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 500,
+      system: [GRIDWISE_SYSTEM as any],
+      messages: [{
+        role: "user",
+        content: `Analyse this company website to qualify it as a Gridwise™ lead.
+
+URL: ${params.url}
+Page title: ${params.pageTitle ?? "Unknown"}
+Scraped content (truncated to 3 000 chars):
+${params.content.slice(0, 3000)}
+
+Respond ONLY with valid JSON — no prose, no markdown fences:
+{
+  "companyName": "...",
+  "industry": "...",
+  "location": "city, state",
+  "employeeEstimate": "50-200",
+  "businessSummary": "2 sentences max",
+  "painPoints": ["...", "..."],
+  "gridwiseFit": 0-100,
+  "gridwiseFitReason": "1 sentence",
+  "targetTitles": ["...", "..."],
+  "idealContactProfile": "1 sentence",
+  "outreachAngle": "efficiency|sustainability|export|direct|wellbeing",
+  "intentSignals": ["...", "..."]
+}`
+      }]
+    });
+    const raw = (msg.content[0] as Anthropic.TextBlock).text.trim();
+    return JSON.parse(raw.replace(/^```json\s*/i, "").replace(/```$/, ""));
+  } catch {
+    return { ...ANALYSIS_FALLBACK, companyName: params.pageTitle ?? params.url };
+  }
+}
+
+// ── Inbound email reply analysis ───────────────────────────────────────────
+
+export type EmailReplyAnalysis = {
+  sentiment: "positive" | "negative" | "neutral";
+  intent: "interested" | "not_interested" | "request_info" | "meeting_request" | "objection" | "unsubscribe" | "other";
+  suggestedStatus: string;
+  nextAction: string;
+  autoReply: string | null;
+};
+
+export async function analyzeEmailReply(params: {
+  subject: string;
+  body: string;
+  fromEmail: string;
+  leadContext: { name?: string; company?: string; lastSubject?: string };
+}): Promise<EmailReplyAnalysis> {
+  const client = getClient();
+  if (!client) {
+    return { sentiment: "neutral", intent: "other", suggestedStatus: "engaged", nextAction: "Review reply manually", autoReply: null };
+  }
+
+  try {
+    const msg = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 350,
+      system: [GRIDWISE_SYSTEM as any],
+      messages: [{
+        role: "user",
+        content: `Analyse this inbound reply to our Gridwise™ outreach email.
+
+From: ${params.fromEmail} (${params.leadContext.name ?? "Lead"}, ${params.leadContext.company ?? "Company"})
+Original subject: ${params.leadContext.lastSubject ?? "Gridwise™ outreach"}
+Reply subject: ${params.subject}
+Reply body:
+${params.body.slice(0, 1200)}
+
+Respond ONLY with valid JSON:
+{
+  "sentiment": "positive|negative|neutral",
+  "intent": "interested|not_interested|request_info|meeting_request|objection|unsubscribe|other",
+  "suggestedStatus": "engaged|cold|meeting_scheduled|qualified|human_review",
+  "nextAction": "one sentence",
+  "autoReply": "2-3 sentence natural reply if appropriate, null if manual review needed"
+}`
+      }]
+    });
+    const raw = (msg.content[0] as Anthropic.TextBlock).text.trim();
+    return JSON.parse(raw.replace(/^```json\s*/i, "").replace(/```$/, ""));
+  } catch {
+    return { sentiment: "neutral", intent: "other", suggestedStatus: "engaged", nextAction: "Review reply manually", autoReply: null };
+  }
+}
+
+// ── AI reply generation ────────────────────────────────────────────────────
+
+export async function generateOutreachReply(params: {
+  originalSubject: string;
+  replyBody: string;
+  lead: { name?: string; company?: string; industry?: string; location?: string };
+  replyIntent: string;
+}): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  try {
+    const msg = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 250,
+      system: [GRIDWISE_SYSTEM as any],
+      messages: [{
+        role: "user",
+        content: `Write a brief, natural reply to this inbound email from ${params.lead.name ?? "the contact"} at ${params.lead.company ?? "their company"}.
+
+Their reply intent: ${params.replyIntent}
+Their message: ${params.replyBody.slice(0, 600)}
+
+Rules:
+- Under 120 words
+- Match their tone
+- If interested → confirm next step (free floor assessment or 20-min call)
+- If objection → address it with one specific Gridwise™ fact
+- Sign off as: Gridwise™ Team | info@earthana.in | +91 99446 70888
+- No subject line`
+      }]
+    });
+    return (msg.content[0] as Anthropic.TextBlock).text.trim();
+  } catch {
+    return null;
+  }
+}

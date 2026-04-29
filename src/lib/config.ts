@@ -12,6 +12,8 @@ export const config = {
   firecrawlApiKey: process.env.FIRECRAWL_API_KEY ?? "",
   instantlyApiKey: process.env.INSTANTLY_API_KEY ?? "",
   retellApiKey: process.env.RETELL_API_KEY ?? "",
+  retellPhoneFrom: process.env.RETELL_PHONE_FROM ?? "",
+  retellAgentId: process.env.RETELL_AGENT_ID ?? "",
   watiApiKey: process.env.WATI_API_KEY ?? "",
   smartleadApiKey: process.env.SMARTLEAD_API_KEY ?? "",
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? ""
